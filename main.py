@@ -39,12 +39,32 @@ else:
 print(f"📊 Upload interval: {UPLOAD_INTERVAL} seconds")
 print("🔄 New HTTP session for each frame (PrusaConnect fix)")
 print("📷 New camera connection for each frame (fresh frames fix)")
+
+def cleanup_timelapse_directory():
+    """
+    Cleans up the timelapse directory by removing all files
+    """
+    try:
+        if os.path.exists(TIMELAPSE_DIR):
+            files = glob.glob(os.path.join(TIMELAPSE_DIR, "*"))
+            for file in files:
+                os.remove(file)
+            print(f"🗑️ Cleared timelapse directory: {TIMELAPSE_DIR}")
+        else:
+            print(f"⚠️ Timelapse directory does not exist: {TIMELAPSE_DIR}")
+    except Exception as e:
+        print(f"❌ Error clearing timelapse directory: {e}")
+
 if ENABLE_TIMELAPSE:
     print(f"🎬 Timelapse enabled: saving every {TIMELAPSE_SAVE_INTERVAL}s, FPS: {TIMELAPSE_FPS}")
     # Create timelapse frames folder
     if not os.path.exists(TIMELAPSE_DIR):
         os.makedirs(TIMELAPSE_DIR)
         print(f"📁 Created folder: {TIMELAPSE_DIR}")
+    
+    # Clean directory at startup (only if timelapse is enabled)
+    print("🧹 Starting timelapse directory cleanup...")
+    cleanup_timelapse_directory()
 
 def capture_frame_from_camera():
     """
@@ -237,7 +257,7 @@ def create_timelapse_video():
         print(f"❌ Error creating timelapse: {e}")
         return False
 
-def cleanup_old_frames(max_frames=1000):
+def cleanup_old_frames(max_frames=100000):
     """
     Removes oldest frames if there are too many
     
